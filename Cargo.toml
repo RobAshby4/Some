@@ -1,0 +1,8 @@
+[package]
+name = "some"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+crossterm = "0.26.1"
+tui = "0.19.0"
