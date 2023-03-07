@@ -11,12 +11,19 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 
-fn get_text(buf: Vec<String>, start: i32, height: u16) -> Result<String, _> {
+fn get_text(bufvec: Vec<String>, start: i32, height: u16) -> String {
+    if start > bufvec.len() as i32 {
+        return String::from("");
+    }
     let mut retbuf = String::new();
     for x in start..height as i32 {
-        retbuf.push_str( &buf.get(x as usize).clone());
+        retbuf.push_str( 
+            match bufvec.get(x as usize).clone() {
+                Some(buf) => buf,
+                None => "",
+            });
     }
-    return Ok(retbuf);
+    return retbuf;
 }
 
 fn main() -> Result<(), io::Error> {
@@ -26,6 +33,7 @@ fn main() -> Result<(), io::Error> {
     }
 
     let mut buf: Vec<String>= Vec::new();
+    let mut start = 0;
     loop {
         let mut linebuf = String::new();
         match io::stdin().read_line(&mut linebuf) {
@@ -54,7 +62,7 @@ fn main() -> Result<(), io::Error> {
             let block = Block::default()
                 .title("output")
                 .borders(Borders::ALL);
-            let tempbuf = get_text(buf.clone(), 0, size.height);
+            let tempbuf = get_text(buf.clone(), start, size.height);
             let para = Paragraph::new(tempbuf).block(block);
             x.render_widget(para, size);
         })?;
@@ -62,6 +70,8 @@ fn main() -> Result<(), io::Error> {
         if let Event::Key(key) = event::read()? {
             match key.code {
                 KeyCode::Char('q') => break,
+                KeyCode::Char('j') => start = start + 1,
+                KeyCode::Char('k') => start = start - 1,
                 _   => {},
                 
             }
