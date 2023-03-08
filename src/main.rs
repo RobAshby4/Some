@@ -1,4 +1,4 @@
-use std::{env, fs, io};
+use std::{env::{self, args}, fs, io};
 use tui::{
     backend::CrosstermBackend,
     widgets::{Block, Borders, Paragraph},
@@ -27,26 +27,38 @@ fn get_text(bufvec: Vec<String>, start: i32, height: u16) -> String {
 }
 
 fn main() -> Result<(), io::Error> {
-    if atty::is(atty::Stream::Stdin) {
-        if std::env::args().len() < 2 {
-            println!("No file given or input on stdin, closing");
-            return Ok(());
-        } else if std::env::args().len() >= 2 {
-            
-        }
-    }
 
     let mut input: Vec<String>= Vec::new();
     let mut start = 0;
-    loop {
-        let mut linebuf = String::new();
-        match io::stdin().read_line(&mut linebuf) {
-            Ok(siz) => {
-                if siz == 0 {break};
-                input.push(linebuf);
-            },
-            Err(_) => break,
-        };
+    if atty::is(atty::Stream::Stdin) {
+        if args().len() < 2 {
+            println!("No file given or input on stdin, closing");
+            return Ok(());
+        } else if args().len() >= 2 {
+            match fs::read_to_string(args().nth(1).expect("file not found!")) {
+                Ok(file) => {
+                    file.split('\n').for_each( |s| {
+                        let mut next_line = String::from(s.clone());
+                        next_line.push('\n');
+                        input.push(next_line);
+                    });
+                },
+                Err(_) => {
+                    panic!("file not found!");
+                },
+            };
+        }
+    } else {
+        loop {
+            let mut linebuf = String::new();
+            match io::stdin().read_line(&mut linebuf) {
+                Ok(siz) => {
+                    if siz == 0 {break};
+                    input.push(linebuf);
+                },
+                Err(_) => break,
+            };
+        }
     }
     
     enable_raw_mode()?;

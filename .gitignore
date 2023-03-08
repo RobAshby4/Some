@@ -2,3 +2,4 @@ cargo.lock
 target/*
 .vscode/launch.json
 Cargo.toml
+src/example/long.txt
