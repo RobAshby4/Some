@@ -1,4 +1,4 @@
-use std::*;
+use std::{env, fs, io};
 use tui::{
     backend::CrosstermBackend,
     widgets::{Block, Borders, Paragraph},
@@ -16,7 +16,7 @@ fn get_text(bufvec: Vec<String>, start: i32, height: u16) -> String {
         return String::from("");
     }
     let mut retbuf = String::new();
-    for x in start..height as i32 {
+    for x in start..(start + height as i32) {
         retbuf.push_str( 
             match bufvec.get(x as usize).clone() {
                 Some(buf) => buf,
@@ -28,18 +28,22 @@ fn get_text(bufvec: Vec<String>, start: i32, height: u16) -> String {
 
 fn main() -> Result<(), io::Error> {
     if atty::is(atty::Stream::Stdin) {
-        println!("No input on stdin, closing");
-        return Ok(());
+        if std::env::args().len() < 2 {
+            println!("No file given or input on stdin, closing");
+            return Ok(());
+        } else if std::env::args().len() >= 2 {
+            
+        }
     }
 
-    let mut buf: Vec<String>= Vec::new();
+    let mut input: Vec<String>= Vec::new();
     let mut start = 0;
     loop {
         let mut linebuf = String::new();
         match io::stdin().read_line(&mut linebuf) {
             Ok(siz) => {
                 if siz == 0 {break};
-                buf.push(linebuf);
+                input.push(linebuf);
             },
             Err(_) => break,
         };
@@ -56,13 +60,15 @@ fn main() -> Result<(), io::Error> {
      
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
+
     loop {
+        let dim = terminal.size().unwrap();
         terminal.draw(|x| {
             let size = x.size();
             let block = Block::default()
                 .title("output")
                 .borders(Borders::ALL);
-            let tempbuf = get_text(buf.clone(), start, size.height);
+            let tempbuf = get_text(input.clone(), start, size.height);
             let para = Paragraph::new(tempbuf).block(block);
             x.render_widget(para, size);
         })?;
@@ -70,8 +76,8 @@ fn main() -> Result<(), io::Error> {
         if let Event::Key(key) = event::read()? {
             match key.code {
                 KeyCode::Char('q') => break,
-                KeyCode::Char('j') => start = start + 1,
-                KeyCode::Char('k') => start = start - 1,
+                KeyCode::Char('j') => if start <= 2 + (input.len() as u16 - dim.height) as i32 {start = start + 1},
+                KeyCode::Char('k') => if start >= 1 {start = start - 1},
                 _   => {},
                 
             }
