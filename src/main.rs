@@ -103,7 +103,7 @@ fn main() -> Result<(), io::Error> {
         if let Event::Key(key) = event::read()? {
             match key.code {
                 KeyCode::Char('q') => break,
-                KeyCode::Char('j') => if start <= (input.len() as u16 - dim.height) as i32 {start = start + 1},
+                KeyCode::Char('j') => if start <= (input.len() as i32 - dim.height as i32) as i32 {start = start + 1},
                 KeyCode::Char('k') => if start >= 1 {start = start - 1},
                 _   => {},
             }

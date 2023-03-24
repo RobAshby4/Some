@@ -16,6 +16,7 @@ $ some foo.bar
 - [x] Pipe input from stdin
 - [x] Read from file arg
 - [ ] Wrap text
+- [ ] Mouse support (scroll)
 - [ ] Proper error handling
 - [ ] Horizontal scroll instead of wrap toggle
 - [ ] Lazy loading of files (to make larger files responsive)
