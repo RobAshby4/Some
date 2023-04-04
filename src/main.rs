@@ -123,3 +123,34 @@ fn main() -> Result<(), io::Error> {
     return Ok(());
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn get_text_test() {
+        let mut bufvec: Vec<String> = Vec::new();
+        
+        // check for empty string 
+        let new_str = get_text(bufvec.clone(), 0, 10);
+        assert_eq!("", new_str);
+
+        let mut vecstring = String::from("vec three\n");
+        bufvec.insert(0, vecstring);
+        vecstring = String::from("vec two\n");
+        bufvec.insert(0, vecstring);
+        vecstring = String::from("vec one\n");
+        bufvec.insert(0, vecstring);
+        
+        // check for a few strings
+        let new_str = get_text(bufvec.clone(), 0, 10);
+        assert_eq!("vec one\nvec two\nvec three\n", new_str);
+        
+        // check for invisible strings
+        let new_str = get_text(bufvec.clone(), 4, 10);
+        assert_eq!("", new_str);
+        
+        let new_str = get_text(bufvec.clone(), 2, 10);
+        assert_eq!("vec three\n", new_str);
+    }
+}
